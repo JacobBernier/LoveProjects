@@ -2,10 +2,10 @@ function love.load()
     math.randomseed(os.time())
 
     sprites = {}
-    sprites.background = love.graphics.newImage('sprites/background.png')
-    sprites.bullet = love.graphics.newImage('sprites/bullet.png')
-    sprites.player = love.graphics.newImage('sprites/player.png')
-    sprites.zombie = love.graphics.newImage('sprites/zombie.png')
+    sprites.background = love.graphics.newImage('sprites/grassTopDown.png')
+    sprites.bullet = love.graphics.newImage('sprites/bullet2.png')
+    sprites.player = love.graphics.newImage('sprites/player2.png')
+    sprites.zombie = love.graphics.newImage('sprites/robots.png')
 
     player = {}
     player.x = love.graphics.getWidth() / 2
@@ -15,6 +15,11 @@ function love.load()
     zombies = {}
     bullets = {}
     bulletsSpin = {}
+
+    zombieSpeedRange = {}
+    zombieSpeedRange.MinSpeed = 120
+    zombieSpeedRange.MaxSpeed = 220
+
 
     
 
@@ -182,10 +187,10 @@ function love.draw()
     end
 
     for i,b in ipairs(bullets) do
-        love.graphics.draw(sprites.bullet, b.x, b.y, b.direction, 0.5, 0.25, sprites.bullet:getWidth()/2, sprites.bullet:getHeight()/2)
+        love.graphics.draw(sprites.bullet, b.x, b.y, b.direction, 0.25, 0.1, sprites.bullet:getWidth()/2, sprites.bullet:getHeight()/2)
     end
     for i,bs in ipairs(bulletsSpin) do
-        love.graphics.draw(sprites.bullet, bs.x, bs.y, bs.direction, 0.5, 0.25, sprites.bullet:getWidth()/2, sprites.bullet:getHeight()/2)
+        love.graphics.draw(sprites.bullet, bs.x, bs.y, bs.direction, 0.25, 0.1, sprites.bullet:getWidth()/2, sprites.bullet:getHeight()/2)
     end
 end
 
@@ -228,7 +233,8 @@ function spawnZombie()
     local zombie = {}
     zombie.x = math.random(0, love.graphics.getWidth())
     zombie.y = math.random(0, love.graphics.getHeight())
-    zombie.speed = 140
+    --zombie.speed = math.random(zombieSpeedRange.MinSpeed, zombieSpeedRange.MaxSpeed)
+    zombie.speed = generateBiasedSpeed(zombieSpeedRange.MinSpeed, zombieSpeedRange.MaxSpeed)
     zombie.dead = false
 
     local side = math.random(1, 4)
@@ -277,4 +283,17 @@ end
 
 function distanceBetween(x1, y1, x2, y2)
     return math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
+end
+
+function generateBiasedSpeed(min, max)
+    local mean = (max + min) / 2 -- Mean skewed towards the lower value
+    local stdDev = (max - min) / 3 -- Standard deviation for the distribution
+    return math.floor(math.max(min, math.min(max, math.random_normal(mean, stdDev))))
+end
+
+function math.random_normal(mean, stdDev)
+    local u1 = math.random()
+    local u2 = math.random()
+    local randStdNormal = math.sqrt(-2 * math.log(u1)) * math.sin(2 * math.pi * u2)
+    return mean + stdDev * randStdNormal
 end
